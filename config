@@ -8,7 +8,7 @@
 # i3 config file (v4)
 #
 # Please see http://i3wm.org/docs/userguide.html for a complete reference!
-
+set $i3_path /home/svx/.i3
 set $mod Mod4
 
 # Font for window titles. Will also be used by the bar unless a different font
@@ -122,18 +122,70 @@ bindsym $mod+Shift+r restart
 # exit i3 (logs you out of your X session)
 bindsym $mod+Shift+y exec "i3-nagbar -t warning -m 'Choose:' -b 'Exit i3' 'i3-msg exit' -b 'Reboot' 'i3-msg exec systemctl reboot' -b 'Poweroff' 'i3-msg exec systemctl poweroff'"
 
-# Create Log out, Reboot, Poweroff bindings
-mode "(E)xit, (R)eboot, (P)oweroff" {  
-        bindsym r exec systemctl reboot
-        bindsym e exit
-        bindsym p exec systemctl poweroff
-
-        # back to normal: Enter or Escape
-        bindsym Return mode "default"
-        bindsym Escape mode "default"
+###
+set $mode_system System (l) lock, (e) logout, (s) suspend, (h) hibernate, (r) reboot, (Shift+s) shutdown
+mode "$mode_system" {
+bindsym l exec --no-startup-id $i3_path/i3exit lock, mode "default"
+bindsym e exec --no-startup-id $i3_path/i3exit logout, mode "default"
+bindsym s exec --no-startup-id $i3_path/i3exit suspend, mode "default"
+bindsym h exec --no-startup-id $i3_path/i3exit hibernate, mode "default"
+bindsym r exec --no-startup-id $i3_path/i3exit reboot, mode "default"
+bindsym Shift+s exec --no-startup-id $i3_path/i3exit shutdown, mode "default"
+# back to normal: Enter or Escape
+bindsym Return mode "default"
+bindsym Escape mode "default"
 }
+bindsym $mod+Shift+e mode "$mode_system"
 
-bindsym $mod+Shift+e mode "(E)xit, (R)eboot, (P)oweroff"
+###
+# Create Log out, Reboot, Poweroff bindings
+#mode "(E)xit, (R)eboot, (P)oweroff" {  
+#        bindsym r exec systemctl reboot
+#        bindsym e exit
+#        bindsym p exec systemctl poweroff
+#
+        # back to normal: Enter or Escape
+#        bindsym Return mode "default"
+#        bindsym Escape mode "default"
+#}
+
+#bindsym $mod+Shift+e mode "(E)xit, (R)eboot, (P)oweroff"
+
+##
+set $mode_move Move workspace to output: ↑, →, ↓, ←
+mode "$mode_move" {
+bindsym Left move workspace to output left
+bindsym Right move workspace to output right
+bindsym Up move workspace to output up
+bindsym Down move workspace to output down
+# back to normal: Enter or Escape
+bindsym Return mode "default"
+bindsym Escape mode "default"
+}
+bindsym $mod+m mode "$mode_move"
+set $mode_external_pos External screen position: ↑, →, ↓, ←
+mode "$mode_external_pos" {
+bindsym Left exec xrandr --output $OUTPUT_E --auto --left-of $OUTPUT_I
+bindsym Right exec xrandr --output $OUTPUT_E --auto --right-of $OUTPUT_I
+bindsym Up exec xrandr --output $OUTPUT_E --auto --above $OUTPUT_I
+bindsym Down exec xrandr --output $OUTPUT_E --auto --below $OUTPUT_I
+# back to normal: Enter or Escape
+bindsym Return mode "default"
+bindsym Escape mode "default"
+}
+bindsym $mod+Shift+s mode "$mode_external_pos"
+set $mode_screen Multi-monitor setup: (e)xternal only, (i)nternal only, (c)lone, (s)eparated
+mode "$mode_screen" {
+bindsym c exec --no-startup-id xrandr --output $OUTPUT_E --auto --output $OUTPUT_I --auto
+bindsym e exec --no-startup-id xrandr --output $OUTPUT_E --auto --output $OUTPUT_I --off
+bindsym i exec --no-startup-id xrandr --output $OUTPUT_I --auto --output $OUTPUT_E --off
+bindsym s exec --no-startup-id xrandr --output $OUTPUT_I --auto && xrandr --output $OUTPUT_E --right-of $OUTPUT_I
+# back to normal: Enter or Escape
+bindsym Return mode "default"
+bindsym Escape mode "default"
+}
+bindsym $mod+Mod1+m mode "$mode_screen"
+
 
 # resize window (you can also use the mouse for that)
 mode "resize" {  
@@ -199,38 +251,10 @@ assign [class="Spotify"] 4:media
 assign [instance="roxterm"] 1:terms  
 assign [class="Gimp"] 6:gfx
 
-#window rules
-for_window [class="^xv|mplayer2|Steam|Wine"] floating enable  
-for_window [title="PlayOnLinux"] floating enable
-
 ##jump commands
 
 #focus ssh window
 bindsym $mod+F1 [instance="ssh"] focus
 
-#mark
-for_window [instance="ssh"] mark karif  
-for_window [class="Aurora|Firefox|Navigator|Chromium"] mark browser
-
-
-bindsym $mod+Shift+g exec $HOME/bin/i3/mark  
-bindsym $mod+g exec $HOME/bin/i3/goto
-
-bindsym $mod+Shift+F9 exec i3-input -F 'mark %s' -l 1 -P 'Mark: '  
-bindsym $mod+Tab exec $HOME/bin/i3-windows  
-bindsym $mod+Shift+F5 exec translate en  
-bindsym $mod+F5 exec translate de
-
-
-### mpd keybindings
-bindsym XF86AudioPlay exec mpc toggle  
-bindsym XF86AudioStop exec mpc stop  
-bindsym XF86AudioNext exec mpc next  
-bindsym XF86AudioPrev exec mpc prev  
-bindsym Shift+XF86AudioNext exec mpc seek +5  
-bindsym Shift+XF86AudioPrev exec mpc seek -5  
-bindsym $mod+Shift+F12 exec --no-startup-id ~/bin/lastfm.sh switch  
-bindsym $mod+F12 exec --no-startup-id ~/bin/lastfm.sh check  
-bindsym $mod+F11 exec --no-startup-id ~/bin/love  
-
-
+exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+exec --no-startup-id nm-applet
